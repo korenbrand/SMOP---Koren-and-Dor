@@ -1,5 +1,7 @@
 from main import board_size
 
+# the score that regular candies exploding from special explosion receive
+BASE_SCORE = 60
 
 class Candy:
     REGULAR, STRIPE_UP, STRIPE_SIDES, WRAP, WRAP_EXPLODE, COLOR_BOMB = 1, 2, 3, 4, 5, 6
@@ -16,14 +18,10 @@ class Candy:
         board[self.location[0], self.location[1]].delete = True
         # if this exploded not from a streak but from a special candy, add EXPLODED_SCORE to total score
         if fromSpecial:
-            return EXPLODED_SCORE
+            return BASE_SCORE
         return 0
 
-# the score that regular candies exploding from special explosion receive
-EXPLODED_SCORE = 60
-
 class Striped(Candy):
-    STRIPED_SCORE = 5000
     # directions for row (left and right) and column (up and down)
     DIRECTIONS = [[(0, 1), (0, -1)],
                   [(1, 0), (-1, 0)]]
@@ -33,8 +31,7 @@ class Striped(Candy):
         self.directions = directions
 
     def explode(self, board):
-        score = 0
-        Candy.explode(self, board)
+        score = Candy.explode(self, board)
         # mark the entire direction (row or column)
         for direction in self.directions:
             row = direction[0]
@@ -46,12 +43,10 @@ class Striped(Candy):
                 row += direction[0]
                 col += direction[1]
 
-        score += Striped.STRIPE_SCORE
         return score
 
 
 class Wrapped(Candy):
-    DETONATION_SCORE = 540
     explosion_template = [[(-1, -1), (-1, 0), (-1, 1),
                            (0, -1), (0, 1),
                            (1, -1), (1, 0), (1, 1)],
@@ -66,7 +61,7 @@ class Wrapped(Candy):
         self.explosion_candies = Wrapped.explosion_template[size]
 
     def explode(self, board, secondExplosion=False):
-        score = 0
+        score = BASE_SCORE
         # iterate over candies to mark
         for candy in Wrapped.explosion_template:
             if 0 <= self.location[0] + candy[0] < board_size and 0 <= self.location[1] + candy[1] < board_size and \
@@ -74,7 +69,6 @@ class Wrapped(Candy):
                     board[self.location[0] + candy[0], self.location[1] + candy[1]].mark == False:
                 score += board[self.location[0] + candy[0], self.location[1] + candy[1]].explode()
 
-        score += Wrapped.DETONATION_SCORE
         # if this is the second explosion - mark the wrapped candy for deletion
         if secondExplosion:
             board[self.location].mark = True
@@ -82,17 +76,14 @@ class Wrapped(Candy):
 
 
 class Chocolate(Candy):
-    CHOCOLATE_SCORE = 10000
     def __init__(self, location):
         Candy.__init__(self, Candy.NO_COLOR, location)
 
     def explode(self, board, color):
-        Candy.explode(self, board)
-        score = 0
+        score = Candy.explode(self, board)
         for row in range(board.shape[0]):
             for col in range(board.shape[1]):
                 if board[row,col] and board[row, col] == color and board[row,col].mark ==  False:
                     score += board[row, col].explode(board)
 
-        score += Chocolate.CHOCOLATE_SCORE
         return score
