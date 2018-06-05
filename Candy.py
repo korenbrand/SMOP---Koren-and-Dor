@@ -1,12 +1,17 @@
-from main import board_size
+board_size = 9
 
 # the score that regular candies exploding from special explosion receive
 BASE_SCORE = 60
 
+
 class Candy:
-    REGULAR, STRIPE_UP, STRIPE_SIDES, WRAP, WRAP_EXPLODE, COLOR_BOMB = 1, 2, 3, 4, 5, 6
+    board_dict = {0: 'blue       ', 1: 's_h_blue   ', 2: 'green      ', 3: 's_h_green  ', 4: 'orange     ', 5: 's_h_orange ',
+                  6: 'purple     ', 7: 's_h_purple ', 8: 'red        ', 9: 's_h_red    ', 10: 'yellow   ', 11: 's_h_yellow ',
+                  12: 'chocolate', 13: 's_v_blue   ', 14: 's_v_green  ', 15: 's_v_orange ', 16: 's_v_red    ',
+                  17: 's_v_yellow ', 18: 's_v_purple ', 19: 'blue_wrapped', 20: 'green_wrapped', 21: 'orange_wrapped',
+                  22: 'purple_wrapped', 23: 'red_wrapped', 24: 'yellow_wrapped', -1: 'empty    '}
     STRIPE_SCORE, WRAP_SCORE, COLOR_BOMB_SCORE = 120, 200, 200
-    RED, BLUE, YELLOW, GREEN, PURPLE, ORANGE, NO_COLOR = 1, 2, 3, 4, 5, 6, -1
+    NO_COLOR = -1
 
     def __init__(self, color, location):
         self.color = color
@@ -15,14 +20,24 @@ class Candy:
         self.mark = False
 
     def explode(self, board):
-        board[self.location[0], self.location[1]].delete = True
+        board[self.location[0], self.location[1]].empty = True
         # if this exploded not from a streak but from a special candy, add EXPLODED_SCORE to total score
         return BASE_SCORE
+
+    def __str__(self):
+        if self.mark:
+            mark = " Mark"
+        else:
+            mark = ""
+        description = '{:16}'.format("Reg " + str(Candy.DESCRIPTION_DICT[self.color]) + mark)
+        return description
+
 
 VERT, HORZ = 1, 0
 # directions for row (left and right) and column (up and down)
 DIRECTIONS = [[(0, 1), (0, -1)],
               [(1, 0), (-1, 0)]]
+
 
 class Striped(Candy):
 
@@ -45,7 +60,9 @@ class Striped(Candy):
 
         return score
 
+
 REGULAR, BIG = 0, 1
+
 
 class Wrapped(Candy):
     explosion_template = [[(-1, -1), (-1, 0), (-1, 1),
@@ -86,7 +103,7 @@ class Chocolate(Candy):
         score = Candy.explode(self, board)
         for row in range(board.shape[0]):
             for col in range(board.shape[1]):
-                if board[row,col] and board[row, col] == color and board[row,col].mark ==  False:
+                if board[row, col] and board[row, col] == color and board[row, col].mark == False:
                     score += board[row, col].explode(board)
 
         return score
