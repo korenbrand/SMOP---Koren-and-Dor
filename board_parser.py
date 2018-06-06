@@ -39,3 +39,7 @@ def interpret_board(self, numbers_board):
             board[row, col] = Board.get_candy(numbers_board[row, col], [row, col])
 
     self.board = board
+
+
+test_board = np.array([[1,2,3],[4,5,6]])
+board = interpret_board(test_board)
