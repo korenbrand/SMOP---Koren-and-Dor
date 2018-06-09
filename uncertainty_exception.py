@@ -7,3 +7,8 @@ class UncertaintyException(Exception):
 class WrappedChocolateException(UncertaintyException):
     def __init__(self):
         UncertaintyException.__init__(self)
+
+
+class ChocolateWithUnknown(UncertaintyException):
+    def __init__(self):
+        UncertaintyException.__init__(self)

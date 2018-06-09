@@ -49,6 +49,7 @@ class Board:
     def interpret_board(self, numbers_board):
         # initialize the new board
         board = np.ndarray(numbers_board.shape, dtype=object)
+        self.height, self.width = board.shape
 
         for row in range(numbers_board.shape[0]):
             for col in range(numbers_board.shape[1]):
@@ -63,8 +64,11 @@ class Board:
         new_board = np.zeros(shape=(height, width), dtype=object)
         for row in range(height):
             for col in range(width):
-                new_board[row][col] = Candy(randint(0, num_of_candies -1), (row, col))  # in randint the edges are inclusive
+                new_board[row][col] = Candy(randint(0, num_of_candies - 1), (row, col))  # in randint the edges are inclusive
         self.board = new_board
+
+    def is_empty(self, location):
+        return self.board[location].empty or isinstance(self.board[location], UnknownCandy)
 
     def check_row_matches(self, row, strike_length=DEFAULT_STRIKE):
         """
@@ -75,6 +79,8 @@ class Board:
         length, strike_start, strike_end = 1, 0, 0
         list_of_matches = []
         for col in range(self.width):
+            if self.is_empty((row, col)):
+                continue
             if col == self.width - 1 or self.board[row, col].color != self.board[row, col + 1].color or self.board[row][col + 1].empty or self.board[row][col].empty:
                 if length >= strike_length:
                     list_of_matches.append((strike_start, strike_end))
@@ -94,6 +100,8 @@ class Board:
         length, strike_start, strike_end = 1, 0, 0
         list_of_matches = []
         for row in range(self.height):
+            if self.is_empty((row, col)):
+                continue
             if row == self.height - 1 or self.board[row][col].color != self.board[row + 1][col].color or self.board[row + 1][col].empty or self.board[row][col].empty:
                 if length >= strike_length:
                     list_of_matches.append((strike_start, strike_end))
@@ -189,6 +197,9 @@ class Board:
                             self.board[last_move.start[0]][col] = Chocolate((last_move.start[0], col))  # with the direction of the last move direction, remove the mark!
 
         special_counters = (striped_counter, wrapped_counter, chocolate_counter)
+
+        if last_move != Board.NONE_MOVE:
+            score += self.board[last_move.start].swipe_explosion(self.board, last_move.end)
         return score, special_counters
 
     def print_board(self):
@@ -229,9 +240,11 @@ class Board:
         ########################
         for row in range(self.height):
             for col in range(self.width - 1):
+
                 self.make_move((row, col), (row, col + 1))  # make move only for checking for matching
                 if self.check_row_matches(row) or self.check_col_matches(col) or self.check_col_matches(
-                        col + 1):  # todo: check if the candies that involve in the move are special and if that append to the special move list.
+                        col + 1) or (isinstance(self.board[row,col],Special) and isinstance(self.board[row,col+1],Special)) or\
+                        isinstance(self.board[row,col],Chocolate) or isinstance(self.board[row,col+1],Chocolate):
                     possible_moves.append(Move((row, col), (row, col + 1), HORZ))
                 self.make_move((row, col), (row, col + 1))  # return to the original board by commit the move again
         ########################
@@ -241,7 +254,8 @@ class Board:
             for row in range(self.height - 1):
                 self.make_move((row, col), (row + 1, col))  # make move only for checking for matching
                 if self.check_col_matches(col) or self.check_row_matches(row) or self.check_row_matches(
-                        row + 1):  # todo: check if the candies that involve in the move are special and if that append to the special move list.
+                        row + 1) or (isinstance(self.board[row,col],Special) and isinstance(self.board[row+1,col],Special)) or \
+                        isinstance(self.board[row, col], Chocolate) or isinstance(self.board[row+1, col], Chocolate):
                     possible_moves.append(Move((row, col), (row + 1, col), VERT))
                 self.make_move((row, col), (row + 1, col))  # return to the original board by commit the move again
         return possible_moves
@@ -290,15 +304,17 @@ class Board:
         score = 0
         for row in range(self.height):
             for col in range(self.width):
-                if self.board[row][col].mark and not self.board[row][col].empty:
-                    score += self.board[row][col].explode(self.board)
+                if self.board[row, col].mark and not self.board[row, col].empty:
+                    score += self.board[row, col].explode(self.board)
 
         return score
 
     def turn_chunk(self, move):
         score = self.mark_candies_to_explode(move)[0]
+        # self.print_board()
         score += self.explosions()
         self.cascade()
+        self.reset_next_round()
 
         return score
 
@@ -308,12 +324,18 @@ class Board:
 
         while chain_score > 0:
             score += chain_score
-            chain_score = self.turn_chunk(move)#
+            chain_score = self.turn_chunk(move)  #
         return score
+
+    def reset_next_round(self):
+        for row in range(self.height):
+            for col in range(self.width):
+                if self.board[row, col].empty:
+                    self.board[row, col] = UnknownCandy((row, col))
 
 
 board = Board(height=6, width=5)
-board_to_copy = np.array([[0, 0, 8, 2, 8], [4, 1, 12, 6, 2], [0, 2, 10, 2, 2], [10, 4, 0, 2, 10], [0, 8, 0, 8, 2], [8, 0, 8, 0, 8]])
+board_to_copy = np.array([[0, 0, 8, 2, 8], [4, 20, 19, 6, 2], [0, 2, 10, 2, 2], [10, 4, 0, 2, 10], [0, 8, 0, 8, 2], [8, 0, 8, 0, 8]])
 board.interpret_board(board_to_copy)
 board.print_board()
 board.turn_function()
