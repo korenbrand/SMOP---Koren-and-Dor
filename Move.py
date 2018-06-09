@@ -12,3 +12,5 @@ class Move:
             # illegal move
             raise ValueError("start and end location are not adjacent")
 
+    def __str__(self):
+        return str(self.start) + " <-->" + str(self.end)
