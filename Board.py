@@ -322,6 +322,7 @@ while True:
     possible_moves = board.possible_moves()
     if not possible_moves:
         print("no more possible moves")
+        pass
         exit(0)
 
     board.print_possible_moves()
@@ -332,7 +333,7 @@ while True:
     board.turn_function(Move(possible_moves[int(x)].start, possible_moves[int(x)].end, True))
 
 # def main():
-#    board = Board(height=3, width=5)
+#    board = Board(height=3, width=5)111
 #    board_to_copy = np.array([[2,0,4,0,4],[0,0,2,0,4],[2,4,0,4,4]])
 #    board.interpret_board(board_to_copy)
 #    board.print_board()
