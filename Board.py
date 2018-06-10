@@ -79,9 +79,7 @@ class Board:
         length, strike_start, strike_end = 1, 0, 0
         list_of_matches = []
         for col in range(self.width):
-            if self.is_empty((row, col)):
-                continue
-            if col == self.width - 1 or self.board[row, col].color != self.board[row, col + 1].color or self.board[row][col + 1].empty or self.board[row][col].empty:
+            if col == self.width - 1 or self.board[row, col].color != self.board[row, col + 1].color or self.is_empty((row,col + 1)) or self.is_empty((row,col)):
                 if length >= strike_length:
                     list_of_matches.append((strike_start, strike_end))
                 length = 1
@@ -100,9 +98,7 @@ class Board:
         length, strike_start, strike_end = 1, 0, 0
         list_of_matches = []
         for row in range(self.height):
-            if self.is_empty((row, col)):
-                continue
-            if row == self.height - 1 or self.board[row][col].color != self.board[row + 1][col].color or self.board[row + 1][col].empty or self.board[row][col].empty:
+            if row == self.height - 1 or self.board[row][col].color != self.board[row + 1][col].color or self.is_empty((row+1,col)) or self.is_empty((row,col)):
                 if length >= strike_length:
                     list_of_matches.append((strike_start, strike_end))
                 length = 1
@@ -132,10 +128,9 @@ class Board:
                 length = tuple_indices[1] - tuple_indices[0] + 1
                 for col_index in range(length):
                     self.board[row][col_index + tuple_indices[0]].mark = True
-                    score += 20
                 if length == Board.STRIPED:  # stripe
                     striped_counter += 1
-                    score += 120
+                    score += 60
                     # todo estimate the score that will yield from this candy
                     if row == last_move.start[0] or row == last_move.end[0]:
                         if tuple_indices[1] >= last_move.start[1] >= tuple_indices[0]:
@@ -147,7 +142,7 @@ class Board:
                 elif length >= Board.CHOCOLATE:  # color bomb
                     chocolate_counter += 1
                     # this is a five streak - each candy awards 40 points instead of 20
-                    score += 100
+                    score += 120
                     if row == last_move.start[0] or row == last_move.end[0]:
                         if tuple_indices[1] >= last_move.start[1] >= tuple_indices[0]:
                             self.board[row][last_move.start[1]] = Chocolate((row, last_move.start[1]))  # ""
@@ -169,14 +164,16 @@ class Board:
                         # if this is an wrap structure, even it also strip structure, make wrap
                         if isinstance(candy, Striped):
                             striped_counter -= 1
+                            score -= 60
                         wrapped_counter += 1
+                        score += 120
                         self.board[row_index + tuple_indices[0], col] = Wrapped(self.board[row_index + tuple_indices[0], col].color, (row_index + tuple_indices[0], col))
                     else:
                         candy.mark = True
 
                 if length == Board.STRIPED:  # stripe
                     striped_counter += 1
-                    score += 120
+                    score += 60
                     if col == last_move.start[1] or col == last_move.end[1]:
                         if tuple_indices[1] >= last_move.start[0] >= tuple_indices[0]:
                             if self.board[last_move.start[0]][col].mark:  # is not un marked wrap:
@@ -199,7 +196,10 @@ class Board:
         special_counters = (striped_counter, wrapped_counter, chocolate_counter)
 
         if last_move != Board.NONE_MOVE:
-            score += self.board[last_move.start].swipe_explosion(self.board, last_move.end)
+            if isinstance(self.board[last_move.start], Special):
+                score += self.board[last_move.start].swipe_explosion(self.board, last_move.end)
+            if isinstance(self.board[last_move.end], Special):
+                score += self.board[last_move.end].swipe_explosion(self.board, last_move.start)
         return score, special_counters
 
     def print_board(self):
@@ -211,6 +211,7 @@ class Board:
                 else:
                     print(self.board[row][col], end="")
             print()
+        print("The score of the board is: ", self.score)
 
     def in_board(self, location):
         """
@@ -243,8 +244,8 @@ class Board:
 
                 self.make_move((row, col), (row, col + 1))  # make move only for checking for matching
                 if self.check_row_matches(row) or self.check_col_matches(col) or self.check_col_matches(
-                        col + 1) or (isinstance(self.board[row,col],Special) and isinstance(self.board[row,col+1],Special)) or\
-                        isinstance(self.board[row,col],Chocolate) or isinstance(self.board[row,col+1],Chocolate):
+                        col + 1) or (isinstance(self.board[row, col], Special) and isinstance(self.board[row, col + 1], Special)) or \
+                        isinstance(self.board[row, col], Chocolate) or isinstance(self.board[row, col + 1], Chocolate):
                     possible_moves.append(Move((row, col), (row, col + 1), HORZ))
                 self.make_move((row, col), (row, col + 1))  # return to the original board by commit the move again
         ########################
@@ -254,8 +255,8 @@ class Board:
             for row in range(self.height - 1):
                 self.make_move((row, col), (row + 1, col))  # make move only for checking for matching
                 if self.check_col_matches(col) or self.check_row_matches(row) or self.check_row_matches(
-                        row + 1) or (isinstance(self.board[row,col],Special) and isinstance(self.board[row+1,col],Special)) or \
-                        isinstance(self.board[row, col], Chocolate) or isinstance(self.board[row+1, col], Chocolate):
+                        row + 1) or (isinstance(self.board[row, col], Special) and isinstance(self.board[row + 1, col], Special)) or \
+                        isinstance(self.board[row, col], Chocolate) or isinstance(self.board[row + 1, col], Chocolate):
                     possible_moves.append(Move((row, col), (row + 1, col), VERT))
                 self.make_move((row, col), (row + 1, col))  # return to the original board by commit the move again
         return possible_moves
@@ -324,7 +325,8 @@ class Board:
 
         while chain_score > 0:
             score += chain_score
-            chain_score = self.turn_chunk(move)  #
+            chain_score = self.turn_chunk(move)
+        self.score += score
         return score
 
     def reset_next_round(self):
@@ -333,27 +335,55 @@ class Board:
                 if self.board[row, col].empty:
                     self.board[row, col] = UnknownCandy((row, col))
 
+    def play_a_game(self, detailed_game=False):  # flag if you want detailed game
+        if detailed_game:
+            self.print_board()
+        self.turn_function()
+        while True:
+            self.print_board()
+            possible_moves = self.possible_moves()
+            if not possible_moves:
+                print("no more possible moves")
+                pass
+                exit(0)
+            self.print_possible_moves()
+            x = raw_input("insert number of move")
+            board.make_move(possible_moves[int(x)].start, possible_moves[int(x)].end)
+            if detailed_game:
+                board.print_board()
+                raw_input()
+            board.turn_function(Move(possible_moves[int(x)].start, possible_moves[int(x)].end, True))
 
-board = Board(height=6, width=5)
-board_to_copy = np.array([[0, 0, 8, 2, 8], [4, 20, 19, 6, 2], [0, 2, 10, 2, 2], [10, 4, 0, 2, 10], [0, 8, 0, 8, 2], [8, 0, 8, 0, 8]])
-board.interpret_board(board_to_copy)
-board.print_board()
-board.turn_function()
-while True:
-    board.print_board()
-    possible_moves = board.possible_moves()
-    if not possible_moves:
-        print("no more possible moves")
-        pass
-        exit(0)
+    @staticmethod
+    def play_game_from_existing_board(board):
+        new_board = Board(board.shape[0], board.shape[1])
+        new_board.interpret_board(board)
+        new_board.play_a_game()
 
-    board.print_possible_moves()
-    x = raw_input("insert number of move")
-    board.make_move(possible_moves[int(x)].start, possible_moves[int(x)].end)
-    board.print_board()
-    raw_input()
-    board.turn_function(Move(possible_moves[int(x)].start, possible_moves[int(x)].end, True))
 
+board = Board()
+board.play_a_game(True)
+#
+# board = Board(height=6, width=5)
+# board_to_copy = np.array([[0, 0, 8, 2, 8], [4, 20, 19, 6, 2], [0, 2, 10, 2, 2], [10, 4, 0, 2, 10], [0, 8, 0, 8, 2], [8, 0, 8, 0, 8]])
+# board.interpret_board(board_to_copy)
+# board.print_board()
+# board.turn_function()
+# while True:
+#    board.print_board()
+#    possible_moves = board.possible_moves()
+#    if not possible_moves:
+#        print("no more possible moves")
+#        pass
+#        exit(0)
+#
+#    board.print_possible_moves()
+#    x = raw_input("insert number of move")
+#    board.make_move(possible_moves[int(x)].start, possible_moves[int(x)].end)
+#    board.print_board()
+#    raw_input()
+#    board.turn_function(Move(possible_moves[int(x)].start, possible_moves[int(x)].end, True))
+#
 # def main():
 #    board = Board(height=3, width=5)111
 #    board_to_copy = np.array([[2,0,4,0,4],[0,0,2,0,4],[2,4,0,4,4]])

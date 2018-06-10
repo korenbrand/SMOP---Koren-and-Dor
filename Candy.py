@@ -27,9 +27,10 @@ class Candy:
 
     def explode(self, board, color=None):
         board[self.location].color = Candy.UNKNOWN
-        board[self.location].empty = True
         self.mark = False
-
+        if board[self.location].empty:
+            return 0
+        board[self.location].empty = True
         return BASE_SCORE
 
     def swipe_explosion(self, board, swipe_loc):
@@ -159,16 +160,15 @@ class Wrapped(Special):
         self.size = size
 
     def explode(self, board, color=None):
-        score = SPECIAL_SCORE
+        score = 0
         # iterate over candies to mark
         for candy in Wrapped.explosion_template[self.size]:
             if 0 <= self.location[0] + candy[0] < board.shape[0] and 0 <= self.location[1] + candy[1] < board.shape[1] and not \
                     board[self.location[0] + candy[0], self.location[1] + candy[1]].empty and not \
                     board[self.location[0] + candy[0], self.location[1] + candy[1]].mark:
                 temp_score = board[self.location[0] + candy[0], self.location[1] + candy[1]].explode(board, color=self.color)
-                if temp_score == BASE_SCORE:
-                    temp_score = SPECIAL_SCORE
-                score += temp_score
+                if temp_score>BASE_SCORE: # the explosion cause second special explosions
+                    score += temp_score
 
         self.mark = True
         # if this is the second explosion - mark the wrapped candy for deletion
@@ -176,7 +176,7 @@ class Wrapped(Special):
             Candy.explode(self, board)
         self.secondExplosion = True
 
-        return score
+        return 540 + score
 
     def __str__(self):
         return 'W ' + Candy.__str__(self)
@@ -210,7 +210,7 @@ class Chocolate(Special):
 
     def explode(self, board, color=0):
         Candy.explode(self, board)
-        score = -SPECIAL_SCORE
+        score = 0
         for row in range(board.shape[0]):
             for col in range(board.shape[1]):
                 if board[row, col].color == color and not board[row, col].empty and not board[row, col].mark:
