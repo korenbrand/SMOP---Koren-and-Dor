@@ -165,7 +165,7 @@ def main():
             move = (move.start, move.end)
             do_move(move)
             total_moves += 1
-        time.sleep(0.6)
+        time.sleep(0.3)
     print 'Total moves done: ' + str(total_moves)
 
 

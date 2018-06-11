@@ -217,10 +217,18 @@ class Wrapped(Special):
 class Chocolate(Special):
     def __init__(self, location, color=Candy.NO_COLOR):
         Special.__init__(self, color, location)
+        self.wrapped_color = 0
+        self.second_explosion = False
 
     def explode(self, board, color=0):
         if self.empty:
             return 0
+
+        if self.second_explosion:
+            color = self.wrapped_color
+            self.second_explosion = False
+
+        unknown_counter = 0
 
         Candy.explode(self, board)
         score = 0
@@ -231,8 +239,27 @@ class Chocolate(Special):
                     if temp_score == BASE_SCORE:
                         temp_score = SPECIAL_SCORE
                     score += temp_score
+                elif isinstance(board[row, col], UnknownCandy) and not board[row, col].mark:
+                    unknown_counter += 1
+        score += SPECIAL_SCORE / 6
 
         return score
+
+    def wrapped_explosion(self, board, color):
+        self.wrapped_color = color
+
+        score = 0
+        for row in range(board.shape[0]):
+            for col in range(board.shape[1]):
+                if board[row, col].color == color and not board[row, col].mark:
+                    temp_score = board[row, col].explode(board)
+                    if temp_score == BASE_SCORE:
+                        temp_score = SPECIAL_SCORE
+                    score += temp_score
+
+        return score
+
+        self.second_explosion = True
 
     def clear_board(self, board):
         for row in range(board.shape[0]):
@@ -267,7 +294,8 @@ class Chocolate(Special):
             board[self.location].mark = True
 
             if isinstance(other, Wrapped):
-                raise WrappedChocolateException()
+                board[swipe_loc] = Candy(other.color, swipe_loc)
+                self.wrapped_explosion(board, other.color)
 
             elif isinstance(other, VerticalStriped):
                 Chocolate.make_special(board, other.color, VerticalStriped)
