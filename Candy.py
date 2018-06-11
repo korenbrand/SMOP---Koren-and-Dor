@@ -167,14 +167,14 @@ class Wrapped(Special):
                     board[self.location[0] + candy[0], self.location[1] + candy[1]].empty and not \
                     board[self.location[0] + candy[0], self.location[1] + candy[1]].mark:
                 temp_score = board[self.location[0] + candy[0], self.location[1] + candy[1]].explode(board, color=self.color)
-                if temp_score>BASE_SCORE: # the explosion cause second special explosions
+                if temp_score > BASE_SCORE: # the explosion cause second special explosions
                     score += temp_score
 
-        self.mark = True
         # if this is the second explosion - mark the wrapped candy for deletion
         if self.secondExplosion:
             Candy.explode(self, board)
         self.secondExplosion = True
+        self.mark = True
 
         return 540 + score
 
