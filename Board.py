@@ -405,15 +405,15 @@ class Board:
                 if isinstance(self.board[row, col], UnknownCandy):
                     self.board[row, col] = Candy(randint(0, 5), (row, col))
 
-    def play_game_with_random(self, player, detailed=False):
+    def play_game_with_random(self, player,num_of_runs=1 ,detailed=False):
         turns_counter = 0
         self.turn_function(with_unknowns=False)
         self.reset_param()
-        for i in range (500):
+        for i in range (num_of_runs):
             if detailed:
                 self.print_board()
             player.get_board(self)
-            self.print_possible_moves()
+            #self.print_possible_moves()
             player.choose_move()
             best_move = player.get_best_move()
             if detailed:
@@ -424,6 +424,7 @@ class Board:
             if detailed:
                 self.print_board()
             turns_counter += 1
+        print (self.score,self.striped_counter,self.wrapped_counter,self.chocolate_counter, self.depth_counter/turns_counter)
         return self.score/turns_counter , self.striped_counter, self.wrapped_counter, self.chocolate_counter, self.depth_counter/turns_counter
 
     def reset_param(self):

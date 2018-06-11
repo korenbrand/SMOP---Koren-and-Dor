@@ -26,7 +26,7 @@ class HeuristicPlayer:
             self.base_board = game_board
         else:
             self.base_board = Board(board_to_copy=game_board)
-        self.base_board.print_board()
+        #self.base_board.print_board()
 
     def get_best_move(self):
         if self.best_move:
@@ -34,7 +34,7 @@ class HeuristicPlayer:
 
         moves = self.base_board.possible_moves()
         move = random.choice(moves)
-        print 'Instead doing: ' + str(move)
+        #print 'Instead doing: ' + str(move)
         return move
 
     @staticmethod
@@ -57,7 +57,7 @@ class HeuristicPlayer:
                 max_value = output
 
         self.best_move = max_move
-        print 'Best move is: ' + str(self.best_move)
+        # 'Best move is: ' + str(self.best_move)
 
 
 class AdvancedHeuristicPlayer(HeuristicPlayer):
@@ -83,7 +83,7 @@ class AdvancedHeuristicPlayer(HeuristicPlayer):
                 max_value = output
 
         self.best_move = max_move
-        print 'Best move is: ' + str(self.best_move)
+        #print 'Best move is: ' + str(self.best_move)
 
     @staticmethod
     def choose_move_helper(board, params, lower_factor, layer_factor, uncertainty_factor):
