@@ -159,11 +159,13 @@ def main():
             # score, move = solver.solve_board(game_board)
             player.get_board(game_board)
             player.choose_move()
+            # if player.base_board.chocolate_counter > 5:
+            #     continue
             move = player.get_best_move()
             move = (move.start, move.end)
             do_move(move)
             total_moves += 1
-        time.sleep(0.4)
+        time.sleep(0.6)
     print 'Total moves done: ' + str(total_moves)
 
 

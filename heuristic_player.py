@@ -5,7 +5,7 @@ from uncertainty_exception import UncertaintyException
 
 from Board import Board
 
-score_coeff, stripe_coeff, wrapped_coeff, chocolate_coeff, uncertainty_factor, low_factor = 0.5, 1, 2, 3, 0.5, 0
+score_coeff, stripe_coeff, wrapped_coeff, chocolate_coeff, uncertainty_factor, low_factor = 0, 3, 2, 0, 0, 0
 
 
 class HeuristicPlayer:
@@ -39,14 +39,20 @@ class HeuristicPlayer:
         for move in self.base_board.possible_moves():
             move_board = copy.deepcopy(self.base_board)
             move_board.reset_param()
-            try:
-                output = self.evaluate_move(move, move_board)
-                if output > max_value:
-                    max_move = move
-                    max_value = output
 
-            except UncertaintyException:
-                print('Uncertainty raised at move: ' + str(move))
+            output = self.evaluate_move(move, move_board)
+            if output > max_value:
+                max_move = move
+                max_value = output
 
         self.best_move = max_move
         print 'Best move is: ' + str(self.best_move)
+
+
+def main():
+    pass
+
+
+
+if __name__ == '__main__':
+    main()

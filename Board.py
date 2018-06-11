@@ -27,6 +27,7 @@ class Board:
         self.striped_counter = 0
         self.wrapped_counter = 0
         self.chocolate_counter = 0
+        self.unknown_prec = 0
         if board_to_copy is not None and board_to_copy.any() and len(board_to_copy.shape) == 2 and \
                 board_to_copy.shape[0] * board_to_copy.shape[1] != 0:
             self.height = board_to_copy.shape[0]
@@ -364,6 +365,7 @@ class Board:
             score += chain_score
             chain_score = self.turn_chunk()
         self.score += score
+        self.unknown_prec = float(self.exploded_counter) / (self.height * self.width)
         return score
 
     def reset_next_round(self):
@@ -399,9 +401,6 @@ class Board:
         self.chocolate_counter = 0
 
     def evaluate_turn(self, score_coeff, stripe_coeff, wrapped_coeff, chocolate_coeff, uncertainty_factor):
-        if float(self.exploded_counter) / (self.height * self.width) > uncertainty_factor:
-            raise UncertaintyException()
-
         return score_coeff * self.score / 100 + stripe_coeff * self.striped_counter + wrapped_coeff * \
                self.wrapped_counter \
                + chocolate_coeff * self.chocolate_counter
