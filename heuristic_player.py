@@ -5,7 +5,7 @@ from uncertainty_exception import UncertaintyException
 
 from Board import Board
 
-score_coeff, stripe_coeff, wrapped_coeff, chocolate_coeff, uncertainty_factor, low_factor = 0, 3, 2, 0, 0, 0
+score_coeff, stripe_coeff, wrapped_coeff, chocolate_coeff, uncertainty_factor, low_factor = 0, 2, 3, 1, 0, 0
 
 
 class HeuristicPlayer:
