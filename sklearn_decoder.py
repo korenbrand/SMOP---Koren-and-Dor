@@ -31,6 +31,7 @@ class ImgRecognizer:
 
     def load(self):
         self._load('Training_Data/Blue', 0)
+        self._load('Training_Data/Blue', 0)
         self._load('Training_Data/Blue_Striped_H', 1)
         self._load('Training_Data/Blue_Striped_V', 13)
         self._load('Training_Data/Blue_Wrapped', 19)
@@ -77,8 +78,7 @@ class ImgRecognizer:
     def predict(self, img):
         resized_img = img.resize(self.downscale_res, Image.BILINEAR)
         np_img = np.array(resized_img).flatten().reshape(1, 3072)
-        print np_img.shape
-        np.reshape(1,-1)
+        np.reshape(1, -1)
         return int(self.svc.predict(np_img))
 
 

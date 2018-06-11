@@ -1,7 +1,9 @@
 from uncertainty_exception import *
 
-board_dict = {0: 'blue       ', 1: 's_h_blue   ', 2: 'green      ', 3: 's_h_green  ', 4: 'orange     ', 5: 's_h_orange ',
-              6: 'purple     ', 7: 's_h_purple ', 8: 'red        ', 9: 's_h_red    ', 10: 'yellow   ', 11: 's_h_yellow ',
+board_dict = {0: 'blue       ', 1: 's_h_blue   ', 2: 'green      ', 3: 's_h_green  ', 4: 'orange     ',
+              5: 's_h_orange ',
+              6: 'purple     ', 7: 's_h_purple ', 8: 'red        ', 9: 's_h_red    ', 10: 'yellow   ',
+              11: 's_h_yellow ',
               12: 'chocolate', 13: 's_v_blue   ', 14: 's_v_green  ', 15: 's_v_orange ', 16: 's_v_red    ',
               17: 's_v_yellow ', 18: 's_v_purple ', 19: 'blue_wrapped', 20: 'green_wrapped', 21: 'orange_wrapped',
               22: 'purple_wrapped', 23: 'red_wrapped', 24: 'yellow_wrapped', -1: 'empty    '}
@@ -44,6 +46,8 @@ class Candy:
         if isinstance(board[swipe_loc], Chocolate):
             return board[swipe_loc].explode(board, self.color)
 
+        return 0
+
     def __str__(self):
         if self.mark:
             mark = "X"
@@ -75,6 +79,9 @@ class Striped(Special):
         self.directions = directions
 
     def explode(self, board, color=None):
+        if self.empty:
+            return 0
+
         score = 0
         Candy.explode(self, board)
         # mark the entire direction (row or column)
@@ -84,7 +91,7 @@ class Striped(Special):
             while 0 <= self.location[0] + row < board.shape[0] and 0 <= self.location[1] + col < board.shape[1] and \
                     board[self.location[0] + row, self.location[1] + col]:
                 temp_score = 0
-                if not board[self.location[0] + row, self.location[1] + col].empty:
+                if not board[self.location[0] + row, self.location[1] + col].mark:
                     temp_score = board[self.location[0] + row, self.location[1] + col].explode(board, color=self.color)
                 if temp_score == BASE_SCORE:
                     temp_score = SPECIAL_SCORE
@@ -160,21 +167,24 @@ class Wrapped(Special):
         self.size = size
 
     def explode(self, board, color=None):
+        if self.empty:
+            return 0
         score = 0
-        # iterate over candies to mark
-        for candy in Wrapped.explosion_template[self.size]:
-            if 0 <= self.location[0] + candy[0] < board.shape[0] and 0 <= self.location[1] + candy[1] < board.shape[1] and not \
-                    board[self.location[0] + candy[0], self.location[1] + candy[1]].empty and not \
-                    board[self.location[0] + candy[0], self.location[1] + candy[1]].mark:
-                temp_score = board[self.location[0] + candy[0], self.location[1] + candy[1]].explode(board, color=self.color)
-                if temp_score > BASE_SCORE: # the explosion cause second special explosions
-                    score += temp_score
 
         # if this is the second explosion - mark the wrapped candy for deletion
         if self.secondExplosion:
             Candy.explode(self, board)
+
         self.secondExplosion = True
-        self.mark = True
+
+        # iterate over candies to explode
+        for candy in Wrapped.explosion_template[self.size]:
+            if 0 <= self.location[0] + candy[0] < board.shape[0] and 0 <= self.location[1] + candy[1] < \
+                    board.shape[1] and not board[self.location[0] + candy[0], self.location[1] + candy[1]].mark:
+                temp_score = board[self.location[0] + candy[0], self.location[1] + candy[1]].explode(board,
+                                                                                                     color=self.color)
+                if temp_score > BASE_SCORE:  # the explosion cause second special explosions
+                    score += temp_score
 
         return 540 + score
 
@@ -209,11 +219,14 @@ class Chocolate(Special):
         Special.__init__(self, color, location)
 
     def explode(self, board, color=0):
+        if self.empty:
+            return 0
+
         Candy.explode(self, board)
         score = 0
         for row in range(board.shape[0]):
             for col in range(board.shape[1]):
-                if board[row, col].color == color and not board[row, col].empty and not board[row, col].mark:
+                if board[row, col].color == color and not board[row, col].mark:
                     temp_score = board[row, col].explode(board)
                     if temp_score == BASE_SCORE:
                         temp_score = SPECIAL_SCORE
@@ -270,7 +283,17 @@ class SuperStriped(Special):
         self.mark = True
 
     def explode(self, board, color=None):
+        if self.empty:
+            return 0
+
         score = 0
+
+        for candy in Wrapped.explosion_template[0]:
+            if 0 <= self.location[0] + candy[0] < board.shape[0] and 0 <= self.location[1] + candy[1] < \
+                    board.shape[1]:
+                temp = board[self.location[0] + candy[0], self.location[1] + candy[1]]
+                board[self.location[0] + candy[0], self.location[1] + candy[1]] = Candy(temp.color, temp.location)
+
         Candy.explode(self, board)
         for row_offset in range(-1, 2):
             for col_offset in range(-1, 2):
@@ -280,8 +303,7 @@ class SuperStriped(Special):
                         col = direction[1] + col_offset
                         while 0 <= self.location[0] + row < board.shape[0] and 0 <= self.location[1] + col < \
                                 board.shape[1] and board[self.location[0] + row, self.location[1] + col]:
-                            temp_score = 0
-                            if not board[self.location[0] + row, self.location[1] + col].empty:
+                            if not board[self.location[0] + row, self.location[1] + col].mark:
                                 temp_score = board[self.location[0] + row, self.location[1] + col].explode(board)
                             if temp_score == BASE_SCORE:
                                 temp_score = SPECIAL_SCORE

@@ -9,6 +9,7 @@ import simple_solver
 import msvcrt as IN
 import cProfile
 import pstats
+from heuristic_player import HeuristicPlayer
 
 # excelent hardcoded values :)
 #board_box = (366, 166, 1008, 738) #OG
@@ -98,8 +99,8 @@ def grab_board():
             #cell.save('Cells/{0}_{1}.bmp'.format(y, x))
             game_board[y][x] = recognizer.predict(cell)
 
-    dbg.print_board(game_board)
     return img
+
 
 ref_img = None
 
@@ -135,7 +136,6 @@ def compare_images(current, reference, threshold):
         if not are_pixels_equal(current_data[i], ref_data[i], threshold):
             diff_pixels += 1
 
-    print diff_pixels
     return diff_pixels
 
 
@@ -149,14 +149,18 @@ def main():
     img_end_game = Image.open('end_screen.bmp')
     img_end_game = img_end_game.resize((img_end_game.size[0]/4, img_end_game.size[1]/4), Image.NEAREST)
     total_moves = 0
-    while total_moves < 50:
+    player = HeuristicPlayer()
+    while total_moves < 100:
         if not board_is_moving():
             board_img = grab_board()
             board_img = board_img.resize((board_img.size[0]/4, board_img.size[1]/4), Image.NEAREST)
             if compare_images(board_img, img_end_game, 10) < 3000:
                 break
-            score, move = solver.solve_board(game_board)
-            print '\nBest move found. Score = {0}, Move = {1}'.format(score, move)
+            # score, move = solver.solve_board(game_board)
+            player.get_board(game_board)
+            player.choose_move()
+            move = player.get_best_move()
+            move = (move.start, move.end)
             do_move(move)
             total_moves += 1
         time.sleep(0.4)
