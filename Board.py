@@ -79,7 +79,7 @@ class Board:
         length, strike_start, strike_end = 1, 0, 0
         list_of_matches = []
         for col in range(self.width):
-            if col == self.width - 1 or self.board[row, col].color != self.board[row, col + 1].color or self.is_empty((row,col + 1)) or self.is_empty((row,col)):
+            if col == self.width - 1 or self.board[row, col].color != self.board[row, col + 1].color or self.is_empty((row, col + 1)) or self.is_empty((row, col)):
                 if length >= strike_length:
                     list_of_matches.append((strike_start, strike_end))
                 length = 1
@@ -98,7 +98,7 @@ class Board:
         length, strike_start, strike_end = 1, 0, 0
         list_of_matches = []
         for row in range(self.height):
-            if row == self.height - 1 or self.board[row][col].color != self.board[row + 1][col].color or self.is_empty((row+1,col)) or self.is_empty((row,col)):
+            if row == self.height - 1 or self.board[row][col].color != self.board[row + 1][col].color or self.is_empty((row + 1, col)) or self.is_empty((row, col)):
                 if length >= strike_length:
                     list_of_matches.append((strike_start, strike_end))
                 length = 1
@@ -123,6 +123,11 @@ class Board:
         ##############
         # ROW CHECK
         ##############
+        if last_move != Board.NONE_MOVE:
+            if isinstance(self.board[last_move.start], Special):
+                score += self.board[last_move.start].swipe_explosion(self.board, last_move.end)
+            if isinstance(self.board[last_move.end], Special):
+                score += self.board[last_move.end].swipe_explosion(self.board, last_move.start)
         for row in range(self.height):
             for tuple_indices in self.check_row_matches(row):
                 length = tuple_indices[1] - tuple_indices[0] + 1
@@ -195,11 +200,6 @@ class Board:
 
         special_counters = (striped_counter, wrapped_counter, chocolate_counter)
 
-        if last_move != Board.NONE_MOVE:
-            if isinstance(self.board[last_move.start], Special):
-                score += self.board[last_move.start].swipe_explosion(self.board, last_move.end)
-            if isinstance(self.board[last_move.end], Special):
-                score += self.board[last_move.end].swipe_explosion(self.board, last_move.start)
         return score, special_counters
 
     def print_board(self):
@@ -348,42 +348,36 @@ class Board:
                 exit(0)
             self.print_possible_moves()
             x = raw_input("insert number of move")
-            board.make_move(possible_moves[int(x)].start, possible_moves[int(x)].end)
+            self.make_move(possible_moves[int(x)].start, possible_moves[int(x)].end)
             if detailed_game:
-                board.print_board()
+                self.print_board()
                 raw_input()
-            board.turn_function(Move(possible_moves[int(x)].start, possible_moves[int(x)].end, True))
-
-    @staticmethod
-    def play_game_from_existing_board(board):
-        new_board = Board(board.shape[0], board.shape[1])
-        new_board.interpret_board(board)
-        new_board.play_a_game()
+            self.turn_function(Move(possible_moves[int(x)].start, possible_moves[int(x)].end, True))
 
 
-board = Board()
+board = Board(4)
 board.play_a_game(True)
-#
-# board = Board(height=6, width=5)
-# board_to_copy = np.array([[0, 0, 8, 2, 8], [4, 20, 19, 6, 2], [0, 2, 10, 2, 2], [10, 4, 0, 2, 10], [0, 8, 0, 8, 2], [8, 0, 8, 0, 8]])
-# board.interpret_board(board_to_copy)
-# board.print_board()
-# board.turn_function()
-# while True:
-#    board.print_board()
-#    possible_moves = board.possible_moves()
-#    if not possible_moves:
-#        print("no more possible moves")
-#        pass
-#        exit(0)
-#
-#    board.print_possible_moves()
-#    x = raw_input("insert number of move")
-#    board.make_move(possible_moves[int(x)].start, possible_moves[int(x)].end)
-#    board.print_board()
-#    raw_input()
-#    board.turn_function(Move(possible_moves[int(x)].start, possible_moves[int(x)].end, True))
-#
+
+
+#board = Board(height=6, width=5)
+#board_to_copy = np.array([[0, 0, 8, 2, 8], [4, 20, 19, 6, 2], [0, 2, 10, 2, 2], [10, 4, 0, 2, 10], [0, 8, 0, 8, 2], [8, 0, 8, 0, 8]])
+#board.interpret_board(board_to_copy)
+#board.print_board()
+#board.turn_function()
+#while True:
+#   board.print_board()
+#   possible_moves = board.possible_moves()
+#   if not possible_moves:
+#       print("no more possible moves")
+#       pass
+#       exit(0)
+#   board.print_possible_moves()
+#   x = raw_input("insert number of move")
+#   board.make_move(possible_moves[int(x)].start, possible_moves[int(x)].end)
+#   board.print_board()
+#   raw_input()
+#   board.turn_function(Move(possible_moves[int(x)].start, possible_moves[int(x)].end, True))
+
 # def main():
 #    board = Board(height=3, width=5)111
 #    board_to_copy = np.array([[2,0,4,0,4],[0,0,2,0,4],[2,4,0,4,4]])
