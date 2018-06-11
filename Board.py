@@ -27,6 +27,7 @@ class Board:
         self.striped_counter = 0
         self.wrapped_counter = 0
         self.chocolate_counter = 0
+        self.depth_counter = 0
         self.unknown_prec = 0
         if board_to_copy is not None and board_to_copy.any() and len(board_to_copy.shape) == 2 and \
                 board_to_copy.shape[0] * board_to_copy.shape[1] != 0:
@@ -279,7 +280,7 @@ class Board:
                         isinstance(self.board[row, col], Special) and isinstance(self.board[row, col + 1],
                                                                                  Special)) or \
                         (isinstance(self.board[row, col], Chocolate) and not self.is_empty((row, col + 1))) or \
-                         isinstance(self.board[row, col + 1], Chocolate) and not self.is_empty((row, col)):
+                        (isinstance(self.board[row, col + 1], Chocolate) and not self.is_empty((row, col))):
                     possible_moves.append(Move((row, col), (row, col + 1), HORZ))
                 self.make_move((row, col), (row, col + 1))  # return to the original board by commit the move again
         ########################
@@ -293,7 +294,7 @@ class Board:
                         isinstance(self.board[row, col], Special) and isinstance(self.board[row + 1, col],
                                                                                  Special)) or \
                         (isinstance(self.board[row, col], Chocolate) and not self.is_empty((row + 1, col))) or \
-                        isinstance(self.board[row + 1, col], Chocolate) and not self.is_empty((row, col)):
+                        (isinstance(self.board[row + 1, col], Chocolate) and not self.is_empty((row, col))):
                     possible_moves.append(Move((row, col), (row + 1, col), VERT))
                 self.make_move((row, col), (row + 1, col))  # return to the original board by commit the move again
 
@@ -348,22 +349,26 @@ class Board:
 
         return score
 
-    def turn_chunk(self, move=NONE_MOVE):
+    def turn_chunk(self, move=NONE_MOVE, with_unknowns=True):
         score = self.mark_candies_to_explode(move)
         # self.print_board()
         score += self.explosions()
         self.cascade()
         self.reset_next_round()
-
+        if not with_unknowns:
+            self.update_unknowns()
         return score
 
-    def turn_function(self, move=NONE_MOVE):
-        score = self.turn_chunk(move)
-        chain_score = self.turn_chunk()
+    def turn_function(self, move=NONE_MOVE, with_unknowns=True):
 
+        multipier = 1
+        score = multipier*self.turn_chunk(move, with_unknowns=with_unknowns)
+        multipier += 1
+        chain_score = multipier*self.turn_chunk(with_unknowns=with_unknowns)
         while chain_score > 0:
+            multipier+=1
             score += chain_score
-            chain_score = self.turn_chunk()
+            chain_score = multipier*self.turn_chunk(with_unknowns=with_unknowns)
         self.score += score
         self.unknown_prec = float(self.exploded_counter) / (self.height * self.width)
         return score
@@ -394,21 +399,48 @@ class Board:
                 raw_input()
             self.turn_function(Move(possible_moves[int(x)].start, possible_moves[int(x)].end, True))
 
+    def update_unknowns(self):
+        for row in range(self.height):
+            for col in range(self.width):
+                if isinstance(self.board[row, col], UnknownCandy):
+                    self.board[row, col] = Candy(randint(0, 5), (row, col))
+
+    def play_game_with_random(self, player, detailed=False):
+        turns_counter = 0
+        self.turn_function(with_unknowns=False)
+        self.reset_param()
+        for i in range (500):
+            if detailed:
+                self.print_board()
+            player.get_board(self)
+            self.print_possible_moves()
+            player.choose_move()
+            best_move = player.get_best_move()
+            if detailed:
+                print(best_move)
+            self.make_move(best_move.start, best_move.end)
+            self.depth_counter += (best_move.start[0]+best_move.end[0])/2
+            self.turn_function(move=best_move, with_unknowns=False)
+            if detailed:
+                self.print_board()
+            turns_counter += 1
+        return self.score/turns_counter , self.striped_counter, self.wrapped_counter, self.chocolate_counter, self.depth_counter/turns_counter
+
     def reset_param(self):
         self.score = 0
         self.striped_counter = 0
         self.wrapped_counter = 0
         self.chocolate_counter = 0
 
-    def evaluate_turn(self, score_coeff, stripe_coeff, wrapped_coeff, chocolate_coeff, uncertainty_factor):
+    def evaluate_turn(self, score_coeff, stripe_coeff, wrapped_coeff, chocolate_coeff):
         return score_coeff * self.score / 100 + stripe_coeff * self.striped_counter + wrapped_coeff * \
                self.wrapped_counter \
                + chocolate_coeff * self.chocolate_counter
 
 
 def main():
-    board_to_copy = np.array([[2, 2, 4, 2, 2], [2, 8, 2, 8, 6], [4, 8, 2, 4, 2],[12,2,4,0,6]])
-    board=Board(board_to_copy=board_to_copy)
+    board_to_copy = np.array([[2, 2, 4, 2, 2], [2, 8, 2, 8, 6], [4, 8, 2, 4, 2], [12, 2, 4, 0, 6]])
+    board = Board(board_to_copy=board_to_copy)
     board.play_a_game(True)
 
 # board = Board(height=6, width=5)
