@@ -42,16 +42,23 @@ class HeuristicPlayer:
         board.make_move(move.start, move.end)
         board.turn_function(move)
 
-        return board.evaluate_turn(*params) + max(move.start[0], move.end[0]) * low_factor
+        return board.evaluate_turn(*params) + float((move.start[0] + move.end[0]) * low_factor) / 2
 
     def choose_move(self):
         max_move = None
         max_value = 0
-        for move in self.base_board.possible_moves():
+        moves = self.base_board.possible_moves()
+
+        if not moves:
+            self.base_board.initialize_board()
+            self.base_board.turn_function(with_unknowns=False)
+            self.choose_move()
+
+        for move in moves:
             move_board = copy.deepcopy(self.base_board)
             move_board.reset_param()
 
-            output = self.evaluate_move(move, move_board, self.params[:-1], self.low_factor)
+            output = self.evaluate_move(move, move_board, self.params, self.low_factor)
             if output > max_value:
                 max_move = move
                 max_value = output

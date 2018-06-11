@@ -37,7 +37,7 @@ class Board:
         else:
             self.height = height
             self.width = width
-            self.initialize_board(num_of_candies, width, height)
+            self.initialize_board()
 
     @staticmethod
     def access_key(x, dictionary):
@@ -72,14 +72,14 @@ class Board:
 
         self.board = board
 
-    def initialize_board(self, num_of_candies, width, height):
+    def initialize_board(self):
         """
         this function initialize new board with random candies.
         """
-        new_board = np.zeros(shape=(height, width), dtype=object)
-        for row in range(height):
-            for col in range(width):
-                new_board[row][col] = Candy(randint(0, num_of_candies - 1),
+        new_board = np.zeros(shape=(self.height, self.width), dtype=object)
+        for row in range(self.height):
+            for col in range(self.width):
+                new_board[row][col] = Candy(randint(0, self.num_of_candies - 1),
                                             (row, col))  # in randint the edges are inclusive
         self.board = new_board
 
@@ -360,15 +360,14 @@ class Board:
         return score
 
     def turn_function(self, move=NONE_MOVE, with_unknowns=True):
-
-        multipier = 1
-        score = multipier*self.turn_chunk(move, with_unknowns=with_unknowns)
-        multipier += 1
-        chain_score = multipier*self.turn_chunk(with_unknowns=with_unknowns)
+        multiplier = 1
+        score = multiplier*self.turn_chunk(move, with_unknowns=with_unknowns)
+        multiplier += 1
+        chain_score = multiplier*self.turn_chunk(with_unknowns=with_unknowns)
         while chain_score > 0:
-            multipier+=1
+            multiplier+=1
             score += chain_score
-            chain_score = multipier*self.turn_chunk(with_unknowns=with_unknowns)
+            chain_score = multiplier*self.turn_chunk(with_unknowns=with_unknowns)
         self.score += score
         self.unknown_prec = float(self.exploded_counter) / (self.height * self.width)
         return score
@@ -409,10 +408,10 @@ class Board:
         turns_counter = 0
         self.turn_function(with_unknowns=False)
         self.reset_param()
+        player.get_board(self)
         for i in range (num_of_runs):
             if detailed:
                 self.print_board()
-            player.get_board(self)
             #self.print_possible_moves()
             player.choose_move()
             best_move = player.get_best_move()
