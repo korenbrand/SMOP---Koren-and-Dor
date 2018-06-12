@@ -42,15 +42,11 @@ class AlgoChecker:
     def checkHeuristic(list_of_hueristics_tuples, num_of_runs, is_advanced, filename):
         pass
         board = Board.Board()
-<<<<<<< HEAD
-        board.print_board()
         counter = 0
         with open("C:/Users/t8374100/Desktop/results for different hurestics" + "/" + filename + ".txt", "a") as results_file:  # the name of the file is the name of the first heuristics tuple
-=======
         # board.print_board()
         with open(filename + ".txt", "a") as results_file:
             # the name of the file is the name of the first heuristics tuple
->>>>>>> 3ba990bd9221f758874c4840a32fc4b01affe4f9
             for heuristic_tuple in list_of_hueristics_tuples:
                 if not is_advanced:
                     heuristic_player = HeuristicPlayer(heuristic_tuple)
@@ -62,11 +58,7 @@ class AlgoChecker:
                 else:
                     results_file.write("H#")
                 results_file.write(str(heuristic_tuple[0]))
-<<<<<<< HEAD
                 for heuristica in heuristic_tuple[1:]:
-=======
-                for heuristica in heuristic_tuple:
->>>>>>> 3ba990bd9221f758874c4840a32fc4b01affe4f9
                     results_file.write("," + str(heuristica))
                 results_file.write("#")
                 results_file.write(str(results_data[0]))
@@ -75,7 +67,6 @@ class AlgoChecker:
                 results_file.write("\n")
 
 
-<<<<<<< HEAD
 
 
 # for i in range(10,110,10) :
@@ -92,7 +83,7 @@ class AlgoChecker:
 #    a = open("C:/Users/t8374100/Desktop/results for different hurestics/convergence2.txt", "a")
 #    a.write(str(i) + ": ")
 #    a.close()
-#AlgoChecker.checkHeuristic([(0.01,2,4,8,0)],4000, False,"[0.01,2,4,8]")
+AlgoChecker.checkHeuristic([(0,0,0,0,0)],2500, False,"[0,0,0,0,0]")
 for i in range(1, 7, 1):
     for j in range(1, 7, 1):
         for k in range(1, 7, 1):
@@ -111,10 +102,10 @@ for a in range (2):
                 for e in range(2):
                     AlgoChecker.checkHeuristic([(a, b, c, d, e)], 2500, False, "BinaryCheck")
 
-=======
+
 output_dir = "C:\\Users\\Koren\\Documents\\SMOP\\"
 
 for x in np.arange(0, 2.01, 0.05):
     print "value: " + str(x)
     AlgoChecker.checkHeuristic([(0.01, 1, 2, 3, 0)], 2500, False, output_dir + "check score calibration")
->>>>>>> 3ba990bd9221f758874c4840a32fc4b01affe4f9
+
