@@ -1,37 +1,120 @@
 from heuristic_player import HeuristicPlayer, AdvancedHeuristicPlayer
 import Board
+import numpy as np
 
+import threading
+import sys
+
+class TimeoutError(Exception): pass
+
+
+def timelimit(timeout):
+    def internal(function):
+        def internal2(*args, **kw):
+            class Calculator(threading.Thread):
+                def __init__(self):
+                    threading.Thread.__init__(self)
+                    self.result = None
+                    self.error = None
+
+                def run(self):
+                    try:
+                        self.result = function(*args, **kw)
+                    except:
+                        self.error = sys.exc_info()[0]
+
+            c = Calculator()
+            c.start()
+            c.join(timeout)
+            if c.isAlive():
+                raise TimeoutError
+            if c.error:
+                raise c.error
+            return c.result
+
+        return internal2
+
+    return internal
 
 class AlgoChecker:
     @staticmethod
+#    @timelimit(266)
     def checkHeuristic(list_of_hueristics_tuples, num_of_runs, is_advanced, filename):
         pass
         board = Board.Board()
+<<<<<<< HEAD
         board.print_board()
-        results_file = open("C:/Users/t8374100/Desktop/results for different hurestics" + "/" + filename + ".txt", "a")  # the name of the file is the name of the first heuristics tuple
-        for heuristic_tuple in list_of_hueristics_tuples:
-            if not is_advanced:
-                heuristic_player = HeuristicPlayer(heuristic_tuple)
-            else:
-                heuristic_player = AdvancedHeuristicPlayer(heuristic_tuple)
-            results_data = board.play_game_with_random(heuristic_player, num_of_runs=num_of_runs, detailed=False)
-            if not is_advanced:
-                results_file.write("S#")
-            else:
-                results_file.write("H#")
-            results_file.write(str(heuristic_tuple[0]))
-            for heuristica in heuristic_tuple[1:]:
-                results_file.write("," + str(heuristica))
-            results_file.write("#")
-            results_file.write(str(results_data[0]))
-            for result in results_data[1:]:
-                results_file.write("," +str(result))
-            results_file.write("\n")
+        counter = 0
+        with open("C:/Users/t8374100/Desktop/results for different hurestics" + "/" + filename + ".txt", "a") as results_file:  # the name of the file is the name of the first heuristics tuple
+=======
+        # board.print_board()
+        with open(filename + ".txt", "a") as results_file:
+            # the name of the file is the name of the first heuristics tuple
+>>>>>>> 3ba990bd9221f758874c4840a32fc4b01affe4f9
+            for heuristic_tuple in list_of_hueristics_tuples:
+                if not is_advanced:
+                    heuristic_player = HeuristicPlayer(heuristic_tuple)
+                else:
+                    heuristic_player = AdvancedHeuristicPlayer(heuristic_tuple)
+                results_data = board.play_game_with_random(heuristic_player, num_of_runs=num_of_runs, detailed=False)
+                if not is_advanced:
+                    results_file.write("S#")
+                else:
+                    results_file.write("H#")
+                results_file.write(str(heuristic_tuple[0]))
+<<<<<<< HEAD
+                for heuristica in heuristic_tuple[1:]:
+=======
+                for heuristica in heuristic_tuple:
+>>>>>>> 3ba990bd9221f758874c4840a32fc4b01affe4f9
+                    results_file.write("," + str(heuristica))
+                results_file.write("#")
+                results_file.write(str(results_data[0]))
+                for result in results_data[1:]:
+                    results_file.write("," + str(result))
+                results_file.write("\n")
 
 
+<<<<<<< HEAD
 
-AlgoChecker.checkHeuristic([(1, 1, 1, 1, 1)], 1000, False, "check")
-AlgoChecker.checkHeuristic([(1, 1, 1, 1, 1)], 1500, False, "check")
-AlgoChecker.checkHeuristic([(1, 1, 1, 1, 1)], 2000, False, "check")
-AlgoChecker.checkHeuristic([(1, 1, 1, 1, 1)], 2500, False, "check")
-AlgoChecker.checkHeuristic([(1, 1, 1, 1, 1)], 3000, False, "check")
+
+# for i in range(10,110,10) :
+#    a = open("C:/Users/t8374100/Desktop/results for different hurestics/convergence2.txt", "a")
+#    a.write(str(i) + ": ")
+#    a.close()
+#    AlgoChecker.checkHeuristic([(1, 2, 3, 4, 1)], i, False, "convergence2")
+# for i in range(100,1100,100) :
+#    a = open("C:/Users/t8374100/Desktop/results for different hurestics/convergence2.txt", "a")
+#    a.write(str(i) + ": ")
+#    a.close()
+#    AlgoChecker.checkHeuristic([(1, 2, 3, 4, 1)], i, False, "convergence2")
+# for i in range (4000, 5500, 500):
+#    a = open("C:/Users/t8374100/Desktop/results for different hurestics/convergence2.txt", "a")
+#    a.write(str(i) + ": ")
+#    a.close()
+#AlgoChecker.checkHeuristic([(0.01,2,4,8,0)],4000, False,"[0.01,2,4,8]")
+for i in range(1, 7, 1):
+    for j in range(1, 7, 1):
+        for k in range(1, 7, 1):
+            try:
+                AlgoChecker.checkHeuristic([(0.01, i, j, k, 0)], 2500, False, "checker")
+                break
+            except:
+                print ("timeout")
+                continue
+
+
+for a in range (2):
+    for b in range(2):
+        for c in range(2):
+            for d in range (2):
+                for e in range(2):
+                    AlgoChecker.checkHeuristic([(a, b, c, d, e)], 2500, False, "BinaryCheck")
+
+=======
+output_dir = "C:\\Users\\Koren\\Documents\\SMOP\\"
+
+for x in np.arange(0, 2.01, 0.05):
+    print "value: " + str(x)
+    AlgoChecker.checkHeuristic([(0.01, 1, 2, 3, 0)], 2500, False, output_dir + "check score calibration")
+>>>>>>> 3ba990bd9221f758874c4840a32fc4b01affe4f9

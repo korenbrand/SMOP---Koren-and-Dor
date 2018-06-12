@@ -5,7 +5,6 @@ from uncertainty_exception import UncertaintyException
 
 from Board import Board
 
-
 # score_coeff, stripe_coeff, wrapped_coeff, chocolate_coeff = 2, 1, 1, 2
 # uncertainty_factor, low_factor, layer_factor = 0, 0, 0
 """
@@ -26,7 +25,7 @@ class HeuristicPlayer:
             self.base_board = game_board
         else:
             self.base_board = Board(board_to_copy=game_board)
-        #self.base_board.print_board()
+        # self.base_board.print_board()
 
     def get_best_move(self):
         if self.best_move:
@@ -34,7 +33,7 @@ class HeuristicPlayer:
 
         moves = self.base_board.possible_moves()
         move = random.choice(moves)
-        #print 'Instead doing: ' + str(move)
+        # print 'Instead doing: ' + str(move)
         return move
 
     @staticmethod
@@ -42,7 +41,7 @@ class HeuristicPlayer:
         board.make_move(move.start, move.end)
         board.turn_function(move)
 
-        return board.evaluate_turn(*params) + float((move.start[0] + move.end[0]) * low_factor) / 2
+        return board.evaluate_turn(*params)
 
     def choose_move(self):
         max_move = None
@@ -90,7 +89,7 @@ class AdvancedHeuristicPlayer(HeuristicPlayer):
                 max_value = output
 
         self.best_move = max_move
-        #print 'Best move is: ' + str(self.best_move)
+        # print 'Best move is: ' + str(self.best_move)
 
     @staticmethod
     def choose_move_helper(board, params, lower_factor, layer_factor, uncertainty_factor):
