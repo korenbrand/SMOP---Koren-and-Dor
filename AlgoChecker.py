@@ -42,9 +42,8 @@ class AlgoChecker:
     def checkHeuristic(list_of_hueristics_tuples, num_of_runs, is_advanced, filename):
         pass
         board = Board.Board()
+        board.print_board()
         counter = 0
-        with open("C:/Users/t8374100/Desktop/results for different hurestics" + "/" + filename + ".txt", "a") as results_file:  # the name of the file is the name of the first heuristics tuple
-        # board.print_board()
         with open(filename + ".txt", "a") as results_file:
             # the name of the file is the name of the first heuristics tuple
             for heuristic_tuple in list_of_hueristics_tuples:
