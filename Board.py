@@ -3,6 +3,7 @@ from random import randint
 import numpy as np
 from Candy import *
 from Move import Move
+import time
 from uncertainty_exception import UncertaintyException
 
 
@@ -27,6 +28,7 @@ class Board:
         self.striped_counter = 0
         self.wrapped_counter = 0
         self.chocolate_counter = 0
+        self.swipe_flag = 0
         self.unknown_prec = 0
         if board_to_copy is not None and board_to_copy.any() and len(board_to_copy.shape) == 2 and \
                 board_to_copy.shape[0] * board_to_copy.shape[1] != 0:
@@ -141,9 +143,15 @@ class Board:
         ##############
         if last_move != Board.NONE_MOVE:
             if isinstance(self.board[last_move.start], Special):
-                score += self.board[last_move.start].swipe_explosion(self.board, last_move.end)
-            if isinstance(self.board[last_move.end], Special):
-                score += self.board[last_move.end].swipe_explosion(self.board, last_move.start)
+                temp = self.board[last_move.start].swipe_explosion(self.board, last_move.end)
+                if temp > 0:
+                    self.swipe_flag = 1
+                    score += temp
+            elif isinstance(self.board[last_move.end], Special):
+                temp = self.board[last_move.end].swipe_explosion(self.board, last_move.start)
+                if temp > 0:
+                    self.swipe_flag = 1
+                    score += temp
 
         for row in range(self.height):
             for tuple_indices in self.check_row_matches(row):
@@ -347,6 +355,8 @@ class Board:
             for col in range(self.width):
                 if self.board[row, col].mark and not self.board[row, col].empty:
                     score += self.board[row, col].explode(self.board, multiplier=self.multiplier)
+                    if isinstance(self.board[row, col], Special) and self.swipe_flag < 1:
+                        self.swipe_flag -= 1
 
         return score
 
@@ -358,6 +368,7 @@ class Board:
         self.reset_next_round()
         if not with_unknowns:
             self.update_unknowns()
+
         return score
 
     def turn_function(self, move=NONE_MOVE, with_unknowns=True):
@@ -370,7 +381,7 @@ class Board:
             score += chain_score
             chain_score = self.multiplier * self.turn_chunk(with_unknowns=with_unknowns)
         self.score += score
-        self.unknown_prec = float(self.exploded_counter) / (self.height * self.width)
+        self.unknown_prec =float(self.exploded_counter) / (self.height * self.width)
         return score
 
     def reset_next_round(self, rand_flag=False):
@@ -413,8 +424,10 @@ class Board:
         turns_counter = 0
         self.turn_function(with_unknowns=False)
         self.reset_param()
+        counter = 0
         player.get_board(self)
         for i in range(num_of_runs):
+            start = time.time()
             if detailed:
                 self.print_board()
             # self.print_possible_moves()
@@ -427,6 +440,8 @@ class Board:
             if detailed:
                 self.print_board()
             turns_counter += 1
+            end = time.time()
+            print(start-end)
 
         print(self.score, self.striped_counter, self.wrapped_counter, self.chocolate_counter)
 
@@ -437,19 +452,17 @@ class Board:
         self.striped_counter = 0
         self.wrapped_counter = 0
         self.chocolate_counter = 0
+        self.swipe_flag = 0
 
-    def evaluate_turn(self, score_coeff, stripe_coeff, wrapped_coeff, chocolate_coeff):
+    def evaluate_turn(self, score_coeff, stripe_coeff, wrapped_coeff, chocolate_coeff, swipe_coeff):
         return score_coeff * self.score / 100 + stripe_coeff * self.striped_counter + wrapped_coeff * \
-               self.wrapped_counter \
-               + chocolate_coeff * self.chocolate_counter
+               self.wrapped_counter + chocolate_coeff * self.chocolate_counter + self.swipe_flag * swipe_coeff
 
 
 def main():
     board_to_copy = np.array([[4, 2, 23, 2, 2], [2, 23, 2, 8, 6], [4, 8, 23, 4, 2], [12, 2, 4, 0, 6]])
     board = Board(board_to_copy=board_to_copy)
     board.play_a_game(True)
-
-
 # board = Board(height=6, width=5)
 # board_to_copy = np.array([[0, 0, 8, 2, 8], [4, 20, 19, 6, 2], [0, 2, 10, 2, 2], [10, 4, 0, 2, 10], [0, 8, 0, 8,
 # 2], [8, 0, 8, 0, 8]])

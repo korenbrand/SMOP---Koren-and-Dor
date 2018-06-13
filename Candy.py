@@ -123,11 +123,13 @@ class Striped(Special):
             else:
                 board[swipe_loc] = HorizontalStriped(other.color, swipe_loc)
                 board[swipe_loc].mark = True
+                return board[swipe_loc].explode(board) + board[self.location].explode(board)
 
         elif isinstance(other, Wrapped):
             board[swipe_loc] = Candy(other.color, swipe_loc)
             board[swipe_loc].mark = True
             board[swipe_loc] = SuperStriped(swipe_loc)
+            return board[swipe_loc].explode(board)
 
         return 0
 
@@ -209,10 +211,12 @@ class Wrapped(Special):
             board[swipe_loc] = Candy(other.color, swipe_loc)
             board[swipe_loc].mark = True
             board[self.location] = SuperStriped(self.location)
+            return board[self.location].explode(board)
 
         elif isinstance(other, Wrapped):
             board[swipe_loc].mark = True
             board[self.location].mark = True
+            return board[swipe_loc].explode(board) + board[self.location].explode(board)
 
         return 0
 
