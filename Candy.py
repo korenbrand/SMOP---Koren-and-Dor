@@ -27,7 +27,7 @@ class Candy:
         self.mark = False
         self.empty = False
 
-    def explode(self, board, color=None):
+    def explode(self, board, color=None, multiplier=None):
         board[self.location].color = Candy.UNKNOWN
         self.mark = False
         if board[self.location].empty:
@@ -78,7 +78,7 @@ class Striped(Special):
         Special.__init__(self, color, location)
         self.directions = directions
 
-    def explode(self, board, color=None):
+    def explode(self, board, color=None, multiplier=None):
         if self.empty:
             return 0
 
@@ -166,27 +166,30 @@ class Wrapped(Special):
         self.secondExplosion = False
         self.size = size
 
-    def explode(self, board, color=None):
+    def explode(self, board, color=None, multiplier=None):
         if self.empty:
             return 0
         score = 0
-
-        # if this is the second explosion - mark the wrapped candy for deletion
-        if self.secondExplosion:
-            Candy.explode(self, board)
-
-        self.secondExplosion = True
+        self.mark = True
 
         # iterate over candies to explode
         for candy in Wrapped.explosion_template[self.size]:
             if 0 <= self.location[0] + candy[0] < board.shape[0] and 0 <= self.location[1] + candy[1] < \
                     board.shape[1] and not board[self.location[0] + candy[0], self.location[1] + candy[1]].mark:
-                temp_score = board[self.location[0] + candy[0], self.location[1] + candy[1]].explode(board,
-                                                                                                     color=self.color)
+                temp_score = board[self.location[0] + candy[0], self.location[1] + candy[1]].explode(board, color=self.color)
                 if temp_score > BASE_SCORE:  # the explosion cause second special explosions
                     score += temp_score
 
-        return 540 + score
+        score = 540 + score
+
+        # if this is the second explosion - mark the wrapped candy for deletion
+        if self.secondExplosion:
+            Candy.explode(self, board)
+            score = score * (multiplier - 1) / multiplier
+
+        self.secondExplosion = True
+
+        return score
 
     def __str__(self):
         return 'W ' + Candy.__str__(self)
@@ -220,7 +223,7 @@ class Chocolate(Special):
         self.wrapped_color = 0
         self.second_explosion = False
 
-    def explode(self, board, color=0):
+    def explode(self, board, color=0, multiplier=None):
         if self.empty:
             return 0
 
@@ -257,9 +260,9 @@ class Chocolate(Special):
                         temp_score = SPECIAL_SCORE
                     score += temp_score
 
-        return score
-
         self.second_explosion = True
+
+        return score
 
     def clear_board(self, board):
         for row in range(board.shape[0]):
@@ -310,7 +313,7 @@ class SuperStriped(Special):
         Special.__init__(self, Candy.SUPER_STRIPED_COLOR, location)
         self.mark = True
 
-    def explode(self, board, color=None):
+    def explode(self, board, color=None, multiplier=None):
         if self.empty:
             return 0
 
