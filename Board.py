@@ -427,16 +427,9 @@ class Board:
             if detailed:
                 self.print_board()
             turns_counter += 1
-<<<<<<< HEAD
-            print("## Turn: " + str(turns_counter))
-        print (self.score,self.striped_counter,self.wrapped_counter,self.chocolate_counter, self.depth_counter/turns_counter)
-        return self.score/turns_counter , self.striped_counter, self.wrapped_counter, self.chocolate_counter, self.depth_counter/turns_counter
-=======
-
         print(self.score, self.striped_counter, self.wrapped_counter, self.chocolate_counter)
 
         return self.score / turns_counter, self.striped_counter, self.wrapped_counter, self.chocolate_counter
->>>>>>> bla-branch
 
     def reset_param(self):
         self.score = 0

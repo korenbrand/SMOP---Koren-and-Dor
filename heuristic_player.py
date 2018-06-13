@@ -67,6 +67,7 @@ class HeuristicPlayer:
 
 
 class AdvancedHeuristicPlayer(HeuristicPlayer):
+    COUNTER = 0
     def __init__(self, params):
         HeuristicPlayer.__init__(self, params[:-2])
         self.layer_factor = params[-2]
@@ -75,7 +76,15 @@ class AdvancedHeuristicPlayer(HeuristicPlayer):
     def choose_move(self):
         max_move = None
         max_value = 0
-        for move in self.base_board.possible_moves():
+
+        moves = self.base_board.possible_moves()
+        print 'here'
+        if not moves:
+            self.base_board.initialize_board()
+            self.base_board.turn_function(with_unknowns=False)
+            self.choose_move()
+
+        for move in moves:
             move_board = copy.deepcopy(self.base_board)
             move_board.reset_param()
 
@@ -95,15 +104,16 @@ class AdvancedHeuristicPlayer(HeuristicPlayer):
     def choose_move_helper(board, params, lower_factor, layer_factor, uncertainty_factor):
         if board.unknown_prec > uncertainty_factor:
             return 0
-
+        print AdvancedHeuristicPlayer.COUNTER
         max_value = 0
         for move in board.possible_moves():
             move_board = copy.deepcopy(board)
             move_board.reset_param()
-
+            AdvancedHeuristicPlayer.COUNTER += 1
             output = AdvancedHeuristicPlayer.evaluate_move(move, move_board, params, lower_factor) + \
                      AdvancedHeuristicPlayer.choose_move_helper(move_board, params, lower_factor, layer_factor,
                                                                 uncertainty_factor)
+            AdvancedHeuristicPlayer.COUNTER-= 1
             if output > max_value:
                 max_value = output
 
