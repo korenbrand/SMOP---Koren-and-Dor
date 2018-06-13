@@ -48,3 +48,21 @@ plt.plot(data[WRAP_H], data[SCORE], '.', label='Wrap')
 plt.plot(data[CHOC_H], data[SCORE], '.', label='Chocolate')
 
 plt.show()
+
+
+def plot(x, y, title, xlab, ylab='Avg. score per turn', type=None):
+    x = np.array([float(x2) for x2 in x])
+    y = np.array([float(y2) for y2 in y])
+
+    y = y[x.argsort()]
+    x.sort()
+
+    if type:
+        plt.plot(x, y, type)
+    else:
+        plt.plot(x, y)
+        
+    plt.title(title)
+    plt.xlabel(xlab)
+    plt.ylabel(ylab)
+    plt.show()
