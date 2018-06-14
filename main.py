@@ -149,7 +149,7 @@ def main():
     img_end_game = Image.open('end_screen.bmp')
     img_end_game = img_end_game.resize((img_end_game.size[0]/4, img_end_game.size[1]/4), Image.NEAREST)
     total_moves = 0
-    player = AdvancedHeuristicPlayer((0.2,3,7,10,5, 0.5, 0.3))
+    player = AdvancedHeuristicPlayer((0.2,3,7,10,2, 0.9, 0.3))
     while total_moves < 100:
         if not board_is_moving():
             board_img = grab_board()

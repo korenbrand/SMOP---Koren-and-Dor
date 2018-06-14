@@ -43,14 +43,16 @@ class AlgoChecker:
     def check_heuristic(list_of_hueristics_tuples, num_of_runs, is_advanced, filename):
         board = Board.Board(height=9, width=9)
         # board.print_board()
+        results_file = open("C:/Users/t8374100/Desktop/results for different hurestics/" + filename + ".txt", "a")
         for heuristic_tuple in list_of_hueristics_tuples:
             if not is_advanced:
                 heuristic_player = HeuristicPlayer(heuristic_tuple)
             else:
                 heuristic_player = AdvancedHeuristicPlayer(heuristic_tuple)
+
             results_data = board.play_game_with_random(heuristic_player, num_of_runs=num_of_runs, detailed=False)
 
-        with open(filename + ".txt", "a") as results_file:
+
             # the name of the file is the name of the first heuristics tuple
             if not is_advanced:
                 results_file.write("S#")
@@ -67,13 +69,7 @@ class AlgoChecker:
 
 
 
-
-for i in range (1):
-    start = time.time()
-    AlgoChecker.check_heuristic([(0.2, 2.5, 7, 10, 50,0.66,0.4)], 225, True, "Advance")
-    end = time.time()
-    print(end- start)
-#AlgoChecker.checkHeuristic([(0.2, 2.5, 7, 9, 0)], 1000, False, "Advance")
-#for x in np.arange(0, 0.4, 0.002):
-   # AlgoChecker.checkHeuristic([(x, 2.5, 7, 9, 0, 0.99,0.99)], 3, True, "Advance")
+for t in range(9):
+    for y in np.arange(0,1,0.1):
+        AlgoChecker.check_heuristic([(0.2,3,7,9,t,y,0.5)],1000,True,"now_for_real")
 

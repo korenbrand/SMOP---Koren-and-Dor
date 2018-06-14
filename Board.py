@@ -142,12 +142,19 @@ class Board:
         # ROW CHECK
         ##############
         if last_move != Board.NONE_MOVE:
-            if isinstance(self.board[last_move.start], Special) and isinstance(self.board[last_move.end], Special):
+            if isinstance(self.board[last_move.start], Chocolate) and isinstance(self.board[last_move.end], Special):
+                    print("wow")
+                    self.swipe_flag = 4
+            elif isinstance(self.board[last_move.start], Special) and isinstance(self.board[last_move.end], Chocolate):
+                    print("wow")
+                    self.swipe_flag = 4
+            elif isinstance(self.board[last_move.start], Special) and isinstance(self.board[last_move.end], Special):
+                    print("1")
                     self.swipe_flag = 1
-            if isinstance(self.board[last_move.start], Chocolate) and not isinstance(self.board[last_move.end], Special):
+            if isinstance(self.board[last_move.start], Chocolate) and (not isinstance(self.board[last_move.end], Special)):
                     print("-1")
                     self.swipe_flag = -1
-            if not isinstance(self.board[last_move.start], Special) and  isinstance(self.board[last_move.end], Chocolate):
+            if (not isinstance(self.board[last_move.start], Special)) and isinstance(self.board[last_move.end], Chocolate):
                     print("-1")
                     self.swipe_flag = -1
             if isinstance(self.board[last_move.start], Special):
@@ -360,7 +367,7 @@ class Board:
                 if self.board[row, col].mark and not self.board[row, col].empty:
                     score += self.board[row, col].explode(self.board, multiplier=self.multiplier)
                     if isinstance(self.board[row, col], Special) and self.swipe_flag < 1:
-                        print("-1")
+                        print("  decrease -1")
                         self.swipe_flag -= 1
 
         return score
@@ -431,7 +438,6 @@ class Board:
         self.reset_param()
         player.get_board(self)
         for i in range(num_of_runs):
-            start = time.time()
             if detailed:
                 self.print_board()
             # self.print_possible_moves()
@@ -444,10 +450,8 @@ class Board:
             if detailed:
                 self.print_board()
             turns_counter += 1
-            end = time.time()
-            print(start-end)
 
-        print(self.score, self.striped_counter, self.wrapped_counter, self.chocolate_counter)
+        print(self.score/turns_counter, self.striped_counter, self.wrapped_counter, self.chocolate_counter)
 
         return self.score / turns_counter, self.striped_counter, self.wrapped_counter, self.chocolate_counter
 
@@ -464,9 +468,10 @@ class Board:
 
 
 def main():
-    board_to_copy = np.array([[19, 12, 6, 2, 2], [2, 0, 2, 8, 6], [4, 8, 10, 4, 2], [0, 2, 4, 0, 6]])
+    board_to_copy = np.array([[1, 12, 6, 2, 2], [2, 0, 2, 8, 6], [4, 8, 10, 4, 2], [0, 2, 4, 0, 6]])
     board = Board(board_to_copy=board_to_copy)
     board.play_a_game(True)
+
 
 # board = Board(height=6, width=5)
 # board_to_copy = np.array([[0, 0, 8, 2, 8], [4, 20, 19, 6, 2], [0, 2, 10, 2, 2], [10, 4, 0, 2, 10], [0, 8, 0, 8,
