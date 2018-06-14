@@ -70,7 +70,7 @@ class AlgoChecker:
 
 for i in range (1):
     start = time.time()
-    AlgoChecker.check_heuristic([(0.2, 2.5, 7, 9, 0.5)], 1000, False, "Advance")
+    AlgoChecker.check_heuristic([(0.2, 2.5, 7, 10, 50,0.66,0.4)], 225, True, "Advance")
     end = time.time()
     print(end- start)
 #AlgoChecker.checkHeuristic([(0.2, 2.5, 7, 9, 0)], 1000, False, "Advance")

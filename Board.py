@@ -142,16 +142,20 @@ class Board:
         # ROW CHECK
         ##############
         if last_move != Board.NONE_MOVE:
+            if isinstance(self.board[last_move.start], Special) and isinstance(self.board[last_move.end], Special):
+                    self.swipe_flag = 1
+            if isinstance(self.board[last_move.start], Chocolate) and not isinstance(self.board[last_move.end], Special):
+                    print("-1")
+                    self.swipe_flag = -1
+            if not isinstance(self.board[last_move.start], Special) and  isinstance(self.board[last_move.end], Chocolate):
+                    print("-1")
+                    self.swipe_flag = -1
             if isinstance(self.board[last_move.start], Special):
                 temp = self.board[last_move.start].swipe_explosion(self.board, last_move.end)
-                if temp > 0:
-                    self.swipe_flag = 1
-                    score += temp
+                score += temp
             elif isinstance(self.board[last_move.end], Special):
                 temp = self.board[last_move.end].swipe_explosion(self.board, last_move.start)
-                if temp > 0:
-                    self.swipe_flag = 1
-                    score += temp
+                score += temp
 
         for row in range(self.height):
             for tuple_indices in self.check_row_matches(row):
@@ -356,6 +360,7 @@ class Board:
                 if self.board[row, col].mark and not self.board[row, col].empty:
                     score += self.board[row, col].explode(self.board, multiplier=self.multiplier)
                     if isinstance(self.board[row, col], Special) and self.swipe_flag < 1:
+                        print("-1")
                         self.swipe_flag -= 1
 
         return score
@@ -365,7 +370,7 @@ class Board:
         # self.print_board()
         score += self.explosions()
         self.cascade()
-        self.reset_next_round()
+        self.reset_next_round(with_unknowns)
         if not with_unknowns:
             self.update_unknowns()
 
@@ -385,7 +390,7 @@ class Board:
         return score
 
     def reset_next_round(self, rand_flag=False):
-        if rand_flag:
+        if not rand_flag:
             self.update_unknowns()
             return
 
@@ -424,7 +429,6 @@ class Board:
         turns_counter = 0
         self.turn_function(with_unknowns=False)
         self.reset_param()
-        counter = 0
         player.get_board(self)
         for i in range(num_of_runs):
             start = time.time()
@@ -460,9 +464,10 @@ class Board:
 
 
 def main():
-    board_to_copy = np.array([[4, 2, 23, 2, 2], [2, 23, 2, 8, 6], [4, 8, 23, 4, 2], [12, 2, 4, 0, 6]])
+    board_to_copy = np.array([[19, 12, 6, 2, 2], [2, 0, 2, 8, 6], [4, 8, 10, 4, 2], [0, 2, 4, 0, 6]])
     board = Board(board_to_copy=board_to_copy)
     board.play_a_game(True)
+
 # board = Board(height=6, width=5)
 # board_to_copy = np.array([[0, 0, 8, 2, 8], [4, 20, 19, 6, 2], [0, 2, 10, 2, 2], [10, 4, 0, 2, 10], [0, 8, 0, 8,
 # 2], [8, 0, 8, 0, 8]])

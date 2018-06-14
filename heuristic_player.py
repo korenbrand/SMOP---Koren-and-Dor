@@ -95,7 +95,7 @@ class AdvancedHeuristicPlayer(HeuristicPlayer):
 
     @staticmethod
     def choose_move_helper(board, params, layer_factor, uncertainty_factor, level):
-        if board.unknown_prec > uncertainty_factor or level > 2:
+        if board.unknown_prec > uncertainty_factor or level > 1:
             return 0
 
         max_value = 0

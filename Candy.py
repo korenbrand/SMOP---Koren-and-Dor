@@ -123,7 +123,7 @@ class Striped(Special):
             else:
                 board[swipe_loc] = HorizontalStriped(other.color, swipe_loc)
                 board[swipe_loc].mark = True
-                return board[swipe_loc].explode(board) + board[self.location].explode(board)
+            return board[swipe_loc].explode(board) + board[self.location].explode(board)
 
         elif isinstance(other, Wrapped):
             board[swipe_loc] = Candy(other.color, swipe_loc)
@@ -248,7 +248,7 @@ class Chocolate(Special):
                     score += temp_score
                 elif isinstance(board[row, col], UnknownCandy) and not board[row, col].mark:
                     unknown_counter += 1
-        score += SPECIAL_SCORE / 6
+        score += unknown_counter*SPECIAL_SCORE / 6
 
         return score
 
@@ -281,7 +281,7 @@ class Chocolate(Special):
             for col in range(board.shape[1]):
                 if board[row, col].color == color and not board[row, col].empty and not board[row, col].mark:
                     board[row, col] = special_type(color, (row, col))
-                    board[row, col].mark = True
+                    board[row, col].mark = False
 
     def swipe_explosion(self, board, swipe_loc):
         """
@@ -302,14 +302,15 @@ class Chocolate(Special):
 
             if isinstance(other, Wrapped):
                 board[swipe_loc] = Candy(other.color, swipe_loc)
-                self.wrapped_explosion(board, other.color)
+                return self.wrapped_explosion(board, other.color)
 
             elif isinstance(other, VerticalStriped):
                 Chocolate.make_special(board, other.color, VerticalStriped)
             elif isinstance(other, HorizontalStriped):
                 Chocolate.make_special(board, other.color, HorizontalStriped)
+            score = self.explode(board, other.color)
 
-            return self.explode(board, other.color)
+            return score
 
 
 class SuperStriped(Special):
