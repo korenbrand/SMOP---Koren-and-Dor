@@ -3,7 +3,6 @@ import Board
 import numpy as np
 import threading
 import sys
-import time
 
 
 class TimeoutError(Exception): pass
@@ -69,7 +68,7 @@ class AlgoChecker:
 
 
 
-for t in range(9):
+for t in range(4,9):
     for y in np.arange(0,1,0.1):
         AlgoChecker.check_heuristic([(0.2,3,7,9,t,y,0.5)],1000,True,"now_for_real")
 

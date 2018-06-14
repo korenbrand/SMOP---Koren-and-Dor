@@ -143,19 +143,19 @@ class Board:
         ##############
         if last_move != Board.NONE_MOVE:
             if isinstance(self.board[last_move.start], Chocolate) and isinstance(self.board[last_move.end], Special):
-                    print("wow")
-                    self.swipe_flag = 4
+                   # print("wow")
+                    self.swipe_flag = 5
             elif isinstance(self.board[last_move.start], Special) and isinstance(self.board[last_move.end], Chocolate):
-                    print("wow")
-                    self.swipe_flag = 4
+                   # print("wow")
+                    self.swipe_flag = 5
             elif isinstance(self.board[last_move.start], Special) and isinstance(self.board[last_move.end], Special):
-                    print("1")
+                  #  print("1")
                     self.swipe_flag = 1
             if isinstance(self.board[last_move.start], Chocolate) and (not isinstance(self.board[last_move.end], Special)):
-                    print("-1")
+                 #   print("-1")
                     self.swipe_flag = -1
             if (not isinstance(self.board[last_move.start], Special)) and isinstance(self.board[last_move.end], Chocolate):
-                    print("-1")
+                 #   print("-1")
                     self.swipe_flag = -1
             if isinstance(self.board[last_move.start], Special):
                 temp = self.board[last_move.start].swipe_explosion(self.board, last_move.end)
@@ -367,7 +367,7 @@ class Board:
                 if self.board[row, col].mark and not self.board[row, col].empty:
                     score += self.board[row, col].explode(self.board, multiplier=self.multiplier)
                     if isinstance(self.board[row, col], Special) and self.swipe_flag < 1:
-                        print("  decrease -1")
+                     #   print("  decrease -1")
                         self.swipe_flag -= 1
 
         return score

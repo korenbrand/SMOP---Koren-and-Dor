@@ -64,3 +64,24 @@ plt.plot(data[WRAP_H], data[SCORE], '.', label='Wrap')
 plt.plot(data[CHOC_H], data[SCORE], '.', label='Chocolate')
 
 plt.show()
+
+
+def plot(x, y, title, xlab, ylab='Avg. score', chart_style=None, resolution=500):
+    x = np.array([float(a) for a in x])
+    y = np.array([float(a) for a in y])
+
+    y = y[x.argsort()]
+    x.sort()
+
+    plt.figure(dpi=resolution)
+
+    if chart_style:
+        plt.plot(x, y, chart_style)
+    else:
+        plt.plot(x, y)
+
+    plt.title(title)
+    plt.xlabel(xlab)
+    plt.ylabel(ylab)
+
+    plt.show()
